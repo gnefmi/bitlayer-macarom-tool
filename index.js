@@ -4,11 +4,9 @@ const fs = require('fs');
 const { config, privateKey } = require('./config');
 const { routerABI, pairABI, erc20ABI } = require('./lib/abi');
 const { resolve } = require('path');
-const { readFileOrCreate } = require('./lib/helper');
-BigInt.prototype.toJSON = function() {
-    return this.toString();
-}
-const logFile = fs.createWriteStream(config.logFilePath, { flags: 'a' });
+const { readFileOrCreate, sleep } = require('./lib/helper');
+const { log, logError } = require('./lib/logger');
+
 const amountFilePath = resolve(__dirname, './amount.txt');
 const provider = new ethers.JsonRpcProvider(config.rpc);
 const wallet = new ethers.Wallet(privateKey, provider);
@@ -133,11 +131,11 @@ async function swapTokens() {
 }
 
 // Call the function to swap tokens
-const times =  new Array(config.swaptime).fill(1).map((item, index) => { return index })
 async function swap() {
     log(`Your address: ${wallet.address}`)
     log(`Config:`, config)
     log(`Start swapping tokens ${config.swaptime} times`)
+    const times =  new Array(config.swaptime).fill(1).map((item, index) => { return index })
     for(const time of times) {
         log(`==================== ${time + 1} ====================`)
         log(`Start swapping (${time + 1} / ${config.swaptime})...`)
@@ -150,24 +148,3 @@ async function swap() {
     }
 }
 swap()
-
-function log(...args) {
-    console.log(...args);
-    args.forEach(arg => logFile.write(`${parseToString(arg)}\n`));
-}
-
-function logError(...args) {
-    console.error(...args);
-    logFile.write(`ERROR: ${args.map(v => v.toString()).join('\n')}\n`);
-}
-
-function parseToString(value) {
-    if(typeof value === 'object') {
-        return JSON.stringify(value);
-    }
-    return value;
-}
-
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}

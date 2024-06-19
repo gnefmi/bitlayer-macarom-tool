@@ -1,5 +1,7 @@
 require('dotenv').config();
 const { resolve } = require('path');
+const { getLocaleDateTime } = require('./lib/helper');
+
 const privateKey = process.env.PRIV_KEY;
 if(!privateKey) {
     console.error('Please set your private key in .env file');
@@ -25,7 +27,7 @@ const config = {
   },
   swaptime: 1, // swap times
   intervalDurationSeconds: 10,
-  logFilePath: resolve(__dirname, `./swap-token-${new Date().toLocaleTimeString()}.log`),
+  logFilePath: resolve(__dirname, `./swap-token-${getLocaleDateTime(new Date())}.log`),
 }
 
 module.exports = {config, privateKey};
